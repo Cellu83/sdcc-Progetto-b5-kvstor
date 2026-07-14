@@ -1,0 +1,4 @@
+/data/
+*.log
+sdcc-b5-kvstore
+/bin/

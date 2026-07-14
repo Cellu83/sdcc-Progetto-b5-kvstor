@@ -1,0 +1,24 @@
+node:
+  id: "node1"
+  bind_address: "0.0.0.0"
+  raft_port: 50051
+  data_dir: "./data/node1"
+
+cluster:
+  peers:
+    - id: "node1"
+      address: "localhost:50051"
+    - id: "node2"
+      address: "localhost:50052"
+    - id: "node3"
+      address: "localhost:50053"
+
+raft:
+  election_timeout_min_ms: 150
+  election_timeout_max_ms: 300
+  heartbeat_interval_ms: 50
+
+snapshot:
+  interval_seconds: 30
+
+log_level: "info"
