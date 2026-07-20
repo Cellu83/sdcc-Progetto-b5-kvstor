@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package kvstore;
+
+option go_package = "github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/kvstore;kvstorepb";
+
+message GetRequest {
+  string key = 1;
+}
+
+message GetResponse {
+  string value = 1;
+  bool found = 2;
+}
+
+message PutRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message PutResponse {
+  bool success = 1;
+}
+
+message DeleteRequest {
+  string key = 1;
+}
+
+message DeleteResponse {
+  bool success = 1;
+}
+
+// KVStoreService è l'API applicativa esposta da ogni consensus node verso
+// il Client proxy service (Fase 6). Solo il nodo Leader del cluster
+// accetta scritture (Put/Delete); questo verrà applicato dal codice del
+// proxy, non da questo contratto.
+service KVStoreService {
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc Put(PutRequest) returns (PutResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+}

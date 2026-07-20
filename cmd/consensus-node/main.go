@@ -4,8 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 
-	"github.com/federicocola/sdcc-b5-kvstore/internal/config"
+	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/config"
+	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/raft"
+	raftpb "github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/raft"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -34,4 +38,18 @@ func main() {
 	fmt.Printf("  Heartbeat interval: %s\n", cfg.HeartbeatInterval())
 	fmt.Printf("  Snapshot interval: %ds\n", cfg.Snapshot.IntervalSeconds)
 	fmt.Printf("  Log level: %s\n", cfg.LogLevel)
+
+	addr := fmt.Sprintf("%s:%d", cfg.Node.BindAddress, cfg.Node.RaftPort)
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatalf("impossibile aprire il listener su %s: %v", addr, err)
+	}
+
+	grpcServer := grpc.NewServer()
+	raftpb.RegisterRaftServiceServer(grpcServer, &raft.Server{NodeID: cfg.Node.ID})
+
+	log.Printf("[%s] RaftService in ascolto su %s", cfg.Node.ID, addr)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("errore del server gRPC: %v", err)
+	}
 }

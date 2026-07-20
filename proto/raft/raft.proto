@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package raft;
+
+option go_package = "github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/raft;raftpb";
+
+// OpType identifica il tipo di operazione applicativa contenuta in una entry
+// di log (specchio di kvstore.OpType in Go).
+enum OpType {
+  OP_PUT = 0;
+  OP_DELETE = 1;
+}
+
+// Command è l'operazione applicativa replicata via Raft (specchio di
+// kvstore.Command in Go).
+message Command {
+  OpType op = 1;
+  string key = 2;
+  string value = 3;
+}
+
+// LogEntry è una singola entry del log replicato (specchio di
+// raftlog.Entry in Go).
+message LogEntry {
+  uint64 term = 1;
+  uint64 index = 2;
+  Command command = 3;
+}
+
+// RequestVoteRequest è l'argomento della RPC RequestVote (Raft paper,
+// Figure 2): usata da un candidato per chiedere il voto agli altri nodi.
+message RequestVoteRequest {
+  uint64 term = 1;
+  string candidate_id = 2;
+  uint64 last_log_index = 3;
+  uint64 last_log_term = 4;
+}
+
+message RequestVoteResponse {
+  uint64 term = 1;
+  bool vote_granted = 2;
+}
+
+// AppendEntriesRequest è l'argomento della RPC AppendEntries (Raft paper,
+// Figure 2): usata dal leader sia per gli heartbeat periodici (entries
+// vuoto) sia per la replica vera e propria del log.
+message AppendEntriesRequest {
+  uint64 term = 1;
+  string leader_id = 2;
+  uint64 prev_log_index = 3;
+  uint64 prev_log_term = 4;
+  repeated LogEntry entries = 5;
+  uint64 leader_commit = 6;
+}
+
+message AppendEntriesResponse {
+  uint64 term = 1;
+  bool success = 2;
+}
+
+// RaftService raccoglie le RPC di coordinamento del consenso scambiate tra
+// i consensus node del cluster.
+service RaftService {
+  rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
+  rpc AppendEntries(AppendEntriesRequest) returns (AppendEntriesResponse);
+}
