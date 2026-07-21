@@ -35,6 +35,7 @@ type RaftConfig struct {
 	ElectionTimeoutMinMs int `yaml:"election_timeout_min_ms"`
 	ElectionTimeoutMaxMs int `yaml:"election_timeout_max_ms"`
 	HeartbeatIntervalMs  int `yaml:"heartbeat_interval_ms"`
+	RPCTimeoutMs         int `yaml:"rpc_timeout_ms"`
 }
 
 // SnapshotConfig raccoglie i parametri dello Snapshot & backup service.
@@ -60,6 +61,12 @@ func (c *Config) ElectionTimeoutRange() (time.Duration, time.Duration) {
 // HeartbeatInterval restituisce l'intervallo di heartbeat come time.Duration.
 func (c *Config) HeartbeatInterval() time.Duration {
 	return time.Duration(c.Raft.HeartbeatIntervalMs) * time.Millisecond
+}
+
+// RPCTimeout restituisce il timeout massimo di attesa per una RPC verso un
+// peer come time.Duration.
+func (c *Config) RPCTimeout() time.Duration {
+	return time.Duration(c.Raft.RPCTimeoutMs) * time.Millisecond
 }
 
 // Load legge e valida un file di configurazione YAML dal path indicato.
@@ -102,6 +109,12 @@ func (c *Config) validate() error {
 	}
 	if c.Raft.HeartbeatIntervalMs >= c.Raft.ElectionTimeoutMinMs {
 		return fmt.Errorf("raft.heartbeat_interval_ms deve essere minore del timeout di elezione minimo")
+	}
+	if c.Raft.RPCTimeoutMs <= 0 {
+		return fmt.Errorf("raft.rpc_timeout_ms deve essere > 0")
+	}
+	if c.Raft.RPCTimeoutMs >= c.Raft.ElectionTimeoutMinMs {
+		return fmt.Errorf("raft.rpc_timeout_ms deve essere minore del timeout di elezione minimo")
 	}
 	return nil
 }

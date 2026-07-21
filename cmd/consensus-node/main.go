@@ -8,6 +8,7 @@ import (
 
 	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/config"
 	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/raft"
+	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/raftlog"
 	raftpb "github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/raft"
 	"google.golang.org/grpc"
 )
@@ -39,6 +40,26 @@ func main() {
 	fmt.Printf("  Snapshot interval: %ds\n", cfg.Snapshot.IntervalSeconds)
 	fmt.Printf("  Log level: %s\n", cfg.LogLevel)
 
+	storage, err := raftlog.Open(cfg.Node.DataDir)
+	if err != nil {
+		log.Fatalf("impossibile apire lo storage persistente: %v", err)
+	}
+
+	peers := make(map[string]string, len(cfg.Cluster.Peers))
+	for _, p := range cfg.Cluster.Peers {
+		peers[p.ID] = p.Address
+	}
+
+	node := raft.NewNode(raft.Config{
+		ID:                 cfg.Node.ID,
+		Peers:              peers,
+		ElectionTimeoutMin: minTimeout,
+		ElectionTimeoutMax: maxTimeout,
+		HeartbeatInterval:  cfg.HeartbeatInterval(),
+		RPCTimeout:         cfg.RPCTimeout(),
+	}, storage, raft.NewClient())
+	node.Run()
+
 	addr := fmt.Sprintf("%s:%d", cfg.Node.BindAddress, cfg.Node.RaftPort)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -46,7 +67,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	raftpb.RegisterRaftServiceServer(grpcServer, &raft.Server{NodeID: cfg.Node.ID})
+	raftpb.RegisterRaftServiceServer(grpcServer, &raft.Server{Node: node})
 
 	log.Printf("[%s] RaftService in ascolto su %s", cfg.Node.ID, addr)
 	if err := grpcServer.Serve(lis); err != nil {
