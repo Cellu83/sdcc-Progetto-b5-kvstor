@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/kvstore"
 	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/raftlog"
 )
 
@@ -24,7 +25,7 @@ func newTestNode(t *testing.T, id string) *Node {
 		ElectionTimeoutMax: 200 * time.Millisecond,
 		HeartbeatInterval:  20 * time.Millisecond,
 		RPCTimeout:         20 * time.Millisecond,
-	}, storage, NewClient())
+	}, storage, kvstore.New(), NewClient())
 }
 
 func TestHandleRequestVote_GrantsVoteForNewerTermWithUpToDateLog(t *testing.T) {
@@ -155,6 +156,78 @@ func TestHandleAppendEntries_PreservesVoteWhenTermUnchanged(t *testing.T) {
 
 	if got := n.storage.VotedFor(); got != "node1" {
 		t.Fatalf("il voto nel term corrente non deve essere azzerato da un AppendEntries a term invariato, ottenuto %q", got)
+	}
+}
+
+func TestHandleAppendEntries_RejectsWhenPrevLogIndexMismatch(t *testing.T) {
+	n := newTestNode(t, "node1")
+
+	// Il nostro log è vuoto, ma il leader pretende che esista già
+	// un'entry all'indice 1: il controllo di coerenza deve rifiutare.
+	result := n.HandleAppendEntries(AppendEntriesArgs{
+		Term:         1,
+		LeaderID:     "node2",
+		PrevLogIndex: 1,
+		PrevLogTerm:  1,
+	})
+
+	if result.Success {
+		t.Fatalf("un AppendEntries con prevLogIndex oltre la fine del nostro log deve essere rifiutato")
+	}
+}
+
+func TestHandleAppendEntries_AppliesCommittedEntriesToStore(t *testing.T) {
+	n := newTestNode(t, "node1")
+
+	entries := []raftlog.Entry{
+		{Term: 1, Index: 1, Command: kvstore.Command{Op: kvstore.OpPut, Key: "x", Value: "42"}},
+	}
+	result := n.HandleAppendEntries(AppendEntriesArgs{
+		Term:         1,
+		LeaderID:     "node2",
+		PrevLogIndex: 0,
+		PrevLogTerm:  0,
+		Entries:      entries,
+		LeaderCommit: 1,
+	})
+
+	if !result.Success {
+		t.Fatalf("un AppendEntries valido con entry coerenti deve avere successo")
+	}
+	value, found := n.Get("x")
+	if !found || value != "42" {
+		t.Fatalf("l'entry committata deve essere applicata allo store, found=%v value=%q", found, value)
+	}
+	if n.CommitIndex() != 1 {
+		t.Fatalf("commitIndex atteso 1, ottenuto %d", n.CommitIndex())
+	}
+}
+
+func TestHandleAppendEntries_TruncatesConflictingEntries(t *testing.T) {
+	n := newTestNode(t, "node1")
+
+	// Un'entry "orfana", mai committata dalla maggioranza, lasciata da un
+	// vecchio leader del term 1.
+	_ = n.storage.SetTermAndVote(1, "")
+	_ = n.storage.Append(raftlog.Entry{Term: 1, Index: 1, Command: kvstore.Command{Op: kvstore.OpPut, Key: "old", Value: "stale"}})
+
+	// Il nuovo leader (term 2) manda una entry diversa allo stesso indice:
+	// è un conflitto, la nostra entry vecchia va scartata.
+	newEntry := raftlog.Entry{Term: 2, Index: 1, Command: kvstore.Command{Op: kvstore.OpPut, Key: "new", Value: "fresh"}}
+	result := n.HandleAppendEntries(AppendEntriesArgs{
+		Term:         2,
+		LeaderID:     "node3",
+		PrevLogIndex: 0,
+		PrevLogTerm:  0,
+		Entries:      []raftlog.Entry{newEntry},
+	})
+
+	if !result.Success {
+		t.Fatalf("AppendEntries deve avere successo dopo aver risolto il conflitto")
+	}
+	log := n.storage.Log()
+	if len(log) != 1 || log[0] != newEntry {
+		t.Fatalf("la entry in conflitto doveva essere sostituita, log attuale=%+v", log)
 	}
 }
 

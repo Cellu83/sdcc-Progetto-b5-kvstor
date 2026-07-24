@@ -58,9 +58,32 @@ message AppendEntriesResponse {
   bool success = 2;
 }
 
+// GetStatusRequest non porta parametri: chiede semplicemente "qual è la tua
+// vista del cluster in questo momento?".
+message GetStatusRequest {}
+
+// PeerInfo identifica un nodo del cluster raggiungibile via gRPC.
+message PeerInfo {
+  string id = 1;
+  string address = 2;
+}
+
+// GetStatusResponse è la vista del cluster secondo il nodo interrogato:
+// chi crede sia l'attuale Leader (vuoto se non lo sa) e quali peer conosce.
+// È il messaggio alla base del pattern Service Discovery: un client (es. il
+// Client proxy service) la usa per scoprire dinamicamente dove indirizzare
+// le richieste, invece di avere indirizzi fissi nel codice.
+message GetStatusResponse {
+  string node_id = 1;
+  string leader_id = 2;
+  repeated PeerInfo peers = 3;
+}
+
 // RaftService raccoglie le RPC di coordinamento del consenso scambiate tra
-// i consensus node del cluster.
+// i consensus node del cluster, più una RPC di sola lettura (GetStatus) per
+// la Service Discovery lato client.
 service RaftService {
   rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
   rpc AppendEntries(AppendEntriesRequest) returns (AppendEntriesResponse);
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
 }

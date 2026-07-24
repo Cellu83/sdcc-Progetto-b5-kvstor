@@ -454,6 +454,162 @@ func (x *AppendEntriesResponse) GetSuccess() bool {
 	return false
 }
 
+// GetStatusRequest non porta parametri: chiede semplicemente "qual è la tua
+// vista del cluster in questo momento?".
+type GetStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStatusRequest) Reset() {
+	*x = GetStatusRequest{}
+	mi := &file_proto_raft_raft_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStatusRequest) ProtoMessage() {}
+
+func (x *GetStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_raft_raft_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetStatusRequest) Descriptor() ([]byte, []int) {
+	return file_proto_raft_raft_proto_rawDescGZIP(), []int{6}
+}
+
+// PeerInfo identifica un nodo del cluster raggiungibile via gRPC.
+type PeerInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PeerInfo) Reset() {
+	*x = PeerInfo{}
+	mi := &file_proto_raft_raft_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PeerInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PeerInfo) ProtoMessage() {}
+
+func (x *PeerInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_raft_raft_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PeerInfo.ProtoReflect.Descriptor instead.
+func (*PeerInfo) Descriptor() ([]byte, []int) {
+	return file_proto_raft_raft_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *PeerInfo) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *PeerInfo) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+// GetStatusResponse è la vista del cluster secondo il nodo interrogato:
+// chi crede sia l'attuale Leader (vuoto se non lo sa) e quali peer conosce.
+// È il messaggio alla base del pattern Service Discovery: un client (es. il
+// Client proxy service) la usa per scoprire dinamicamente dove indirizzare
+// le richieste, invece di avere indirizzi fissi nel codice.
+type GetStatusResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	LeaderId      string                 `protobuf:"bytes,2,opt,name=leader_id,json=leaderId,proto3" json:"leader_id,omitempty"`
+	Peers         []*PeerInfo            `protobuf:"bytes,3,rep,name=peers,proto3" json:"peers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStatusResponse) Reset() {
+	*x = GetStatusResponse{}
+	mi := &file_proto_raft_raft_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStatusResponse) ProtoMessage() {}
+
+func (x *GetStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_raft_raft_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetStatusResponse) Descriptor() ([]byte, []int) {
+	return file_proto_raft_raft_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetStatusResponse) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *GetStatusResponse) GetLeaderId() string {
+	if x != nil {
+		return x.LeaderId
+	}
+	return ""
+}
+
+func (x *GetStatusResponse) GetPeers() []*PeerInfo {
+	if x != nil {
+		return x.Peers
+	}
+	return nil
+}
+
 var File_proto_raft_raft_proto protoreflect.FileDescriptor
 
 const file_proto_raft_raft_proto_rawDesc = "" +
@@ -484,14 +640,23 @@ const file_proto_raft_raft_proto_rawDesc = "" +
 	"\rleader_commit\x18\x06 \x01(\x04R\fleaderCommit\"E\n" +
 	"\x15AppendEntriesResponse\x12\x12\n" +
 	"\x04term\x18\x01 \x01(\x04R\x04term\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess*#\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\"\x12\n" +
+	"\x10GetStatusRequest\"4\n" +
+	"\bPeerInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\"o\n" +
+	"\x11GetStatusResponse\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x1b\n" +
+	"\tleader_id\x18\x02 \x01(\tR\bleaderId\x12$\n" +
+	"\x05peers\x18\x03 \x03(\v2\x0e.raft.PeerInfoR\x05peers*#\n" +
 	"\x06OpType\x12\n" +
 	"\n" +
 	"\x06OP_PUT\x10\x00\x12\r\n" +
-	"\tOP_DELETE\x10\x012\x9b\x01\n" +
+	"\tOP_DELETE\x10\x012\xd9\x01\n" +
 	"\vRaftService\x12B\n" +
 	"\vRequestVote\x12\x18.raft.RequestVoteRequest\x1a\x19.raft.RequestVoteResponse\x12H\n" +
-	"\rAppendEntries\x12\x1a.raft.AppendEntriesRequest\x1a\x1b.raft.AppendEntriesResponseB>Z<github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/raft;raftpbb\x06proto3"
+	"\rAppendEntries\x12\x1a.raft.AppendEntriesRequest\x1a\x1b.raft.AppendEntriesResponse\x12<\n" +
+	"\tGetStatus\x12\x16.raft.GetStatusRequest\x1a\x17.raft.GetStatusResponseB>Z<github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/raft;raftpbb\x06proto3"
 
 var (
 	file_proto_raft_raft_proto_rawDescOnce sync.Once
@@ -506,7 +671,7 @@ func file_proto_raft_raft_proto_rawDescGZIP() []byte {
 }
 
 var file_proto_raft_raft_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_raft_raft_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_proto_raft_raft_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_proto_raft_raft_proto_goTypes = []any{
 	(OpType)(0),                   // 0: raft.OpType
 	(*Command)(nil),               // 1: raft.Command
@@ -515,20 +680,26 @@ var file_proto_raft_raft_proto_goTypes = []any{
 	(*RequestVoteResponse)(nil),   // 4: raft.RequestVoteResponse
 	(*AppendEntriesRequest)(nil),  // 5: raft.AppendEntriesRequest
 	(*AppendEntriesResponse)(nil), // 6: raft.AppendEntriesResponse
+	(*GetStatusRequest)(nil),      // 7: raft.GetStatusRequest
+	(*PeerInfo)(nil),              // 8: raft.PeerInfo
+	(*GetStatusResponse)(nil),     // 9: raft.GetStatusResponse
 }
 var file_proto_raft_raft_proto_depIdxs = []int32{
 	0, // 0: raft.Command.op:type_name -> raft.OpType
 	1, // 1: raft.LogEntry.command:type_name -> raft.Command
 	2, // 2: raft.AppendEntriesRequest.entries:type_name -> raft.LogEntry
-	3, // 3: raft.RaftService.RequestVote:input_type -> raft.RequestVoteRequest
-	5, // 4: raft.RaftService.AppendEntries:input_type -> raft.AppendEntriesRequest
-	4, // 5: raft.RaftService.RequestVote:output_type -> raft.RequestVoteResponse
-	6, // 6: raft.RaftService.AppendEntries:output_type -> raft.AppendEntriesResponse
-	5, // [5:7] is the sub-list for method output_type
-	3, // [3:5] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	8, // 3: raft.GetStatusResponse.peers:type_name -> raft.PeerInfo
+	3, // 4: raft.RaftService.RequestVote:input_type -> raft.RequestVoteRequest
+	5, // 5: raft.RaftService.AppendEntries:input_type -> raft.AppendEntriesRequest
+	7, // 6: raft.RaftService.GetStatus:input_type -> raft.GetStatusRequest
+	4, // 7: raft.RaftService.RequestVote:output_type -> raft.RequestVoteResponse
+	6, // 8: raft.RaftService.AppendEntries:output_type -> raft.AppendEntriesResponse
+	9, // 9: raft.RaftService.GetStatus:output_type -> raft.GetStatusResponse
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_raft_raft_proto_init() }
@@ -542,7 +713,7 @@ func file_proto_raft_raft_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_raft_raft_proto_rawDesc), len(file_proto_raft_raft_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   6,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

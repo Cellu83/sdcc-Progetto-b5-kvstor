@@ -7,8 +7,10 @@ import (
 	"net"
 
 	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/config"
+	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/kvstore"
 	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/raft"
 	"github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/raftlog"
+	kvstorepb "github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/kvstore"
 	raftpb "github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/raft"
 	"google.golang.org/grpc"
 )
@@ -50,6 +52,8 @@ func main() {
 		peers[p.ID] = p.Address
 	}
 
+	store := kvstore.New()
+
 	node := raft.NewNode(raft.Config{
 		ID:                 cfg.Node.ID,
 		Peers:              peers,
@@ -57,7 +61,7 @@ func main() {
 		ElectionTimeoutMax: maxTimeout,
 		HeartbeatInterval:  cfg.HeartbeatInterval(),
 		RPCTimeout:         cfg.RPCTimeout(),
-	}, storage, raft.NewClient())
+	}, storage, store, raft.NewClient())
 	node.Run()
 
 	addr := fmt.Sprintf("%s:%d", cfg.Node.BindAddress, cfg.Node.RaftPort)
@@ -68,8 +72,9 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	raftpb.RegisterRaftServiceServer(grpcServer, &raft.Server{Node: node})
+	kvstorepb.RegisterKVStoreServiceServer(grpcServer, &raft.KVServer{Node: node})
 
-	log.Printf("[%s] RaftService in ascolto su %s", cfg.Node.ID, addr)
+	log.Printf("[%s] RaftService + KVStoreService in ascolto su %s", cfg.Node.ID, addr)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("errore del server gRPC: %v", err)
 	}

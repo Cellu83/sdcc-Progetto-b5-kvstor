@@ -129,6 +129,22 @@ func (s *Storage) Append(entries ...Entry) error {
 	return s.persist()
 }
 
+// Truncate rimuove dal log tutte le entry a partire da fromIndex (incluso)
+// fino alla fine, e persiste subito il log troncato. Serve quando un
+// follower riceve dal leader un'entry in conflitto con una già presente
+// allo stesso indice (term diverso): quella entry e tutte quelle dopo di
+// lei non erano mai state confermate dalla maggioranza, quindi vanno
+// scartate per lasciare spazio alla versione del leader corrente.
+func (s *Storage) Truncate(fromIndex uint64) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if fromIndex == 0 || fromIndex > uint64(len(s.state.Log)) {
+		return nil
+	}
+	s.state.Log = s.state.Log[:fromIndex-1]
+	return s.persist()
+}
+
 // LastLogIndex restituisce l'Index dell'ultima entry del log, 0 se il log
 // è vuoto.
 func (s *Storage) LastLogIndex() uint64 {

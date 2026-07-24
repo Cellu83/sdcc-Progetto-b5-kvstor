@@ -79,6 +79,7 @@ func (c *Client) AppendEntries(ctx context.Context, addr string, args AppendEntr
 		LeaderId:     args.LeaderID,
 		PrevLogIndex: args.PrevLogIndex,
 		PrevLogTerm:  args.PrevLogTerm,
+		Entries:      toProtoEntries(args.Entries),
 		LeaderCommit: args.LeaderCommit,
 	})
 	if err != nil {

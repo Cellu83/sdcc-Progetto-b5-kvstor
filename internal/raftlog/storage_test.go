@@ -143,6 +143,60 @@ func TestLastLogIndexAndTermAfterAppend(t *testing.T) {
 	}
 }
 
+func TestTruncateRemovesEntryAndEverythingAfter(t *testing.T) {
+	dir := t.TempDir()
+	s, _ := Open(dir)
+
+	_ = s.Append(
+		Entry{Term: 1, Index: 1, Command: kvstore.Command{Op: kvstore.OpPut, Key: "a", Value: "1"}},
+		Entry{Term: 1, Index: 2, Command: kvstore.Command{Op: kvstore.OpPut, Key: "b", Value: "2"}},
+		Entry{Term: 1, Index: 3, Command: kvstore.Command{Op: kvstore.OpPut, Key: "c", Value: "3"}},
+	)
+
+	if err := s.Truncate(2); err != nil {
+		t.Fatalf("Truncate fallita: %v", err)
+	}
+
+	log := s.Log()
+	if len(log) != 1 {
+		t.Fatalf("dopo Truncate(2) deve restare solo 1 entry, ottenute %d", len(log))
+	}
+	if log[0].Index != 1 {
+		t.Fatalf("l'unica entry rimasta deve avere Index=1, ottenuto %d", log[0].Index)
+	}
+}
+
+func TestTruncateBeyondLogIsNoOp(t *testing.T) {
+	dir := t.TempDir()
+	s, _ := Open(dir)
+	_ = s.Append(Entry{Term: 1, Index: 1, Command: kvstore.Command{Op: kvstore.OpPut, Key: "a", Value: "1"}})
+
+	if err := s.Truncate(5); err != nil {
+		t.Fatalf("Truncate oltre la fine del log non dovrebbe fallire: %v", err)
+	}
+	if len(s.Log()) != 1 {
+		t.Fatalf("Truncate oltre la fine del log non deve rimuovere nulla, ottenute %d entry", len(s.Log()))
+	}
+}
+
+func TestTruncatePersistsAcrossRestart(t *testing.T) {
+	dir := t.TempDir()
+	s1, _ := Open(dir)
+	_ = s1.Append(
+		Entry{Term: 1, Index: 1, Command: kvstore.Command{Op: kvstore.OpPut, Key: "a", Value: "1"}},
+		Entry{Term: 1, Index: 2, Command: kvstore.Command{Op: kvstore.OpPut, Key: "b", Value: "2"}},
+	)
+	_ = s1.Truncate(2)
+
+	s2, err := Open(dir)
+	if err != nil {
+		t.Fatalf("riapertura dopo 'riavvio' fallita: %v", err)
+	}
+	if len(s2.Log()) != 1 {
+		t.Fatalf("il troncamento deve sopravvivere a un riavvio, ottenute %d entry", len(s2.Log()))
+	}
+}
+
 // TestNoLingeringTmpFileAfterPersist verifica che il file temporaneo usato
 // per la scrittura atomica non resti sul disco dopo una persist riuscita.
 func TestNoLingeringTmpFileAfterPersist(t *testing.T) {
