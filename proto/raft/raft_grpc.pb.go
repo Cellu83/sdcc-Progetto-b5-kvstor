@@ -22,6 +22,7 @@ const (
 	RaftService_RequestVote_FullMethodName   = "/raft.RaftService/RequestVote"
 	RaftService_AppendEntries_FullMethodName = "/raft.RaftService/AppendEntries"
 	RaftService_GetStatus_FullMethodName     = "/raft.RaftService/GetStatus"
+	RaftService_GetSnapshot_FullMethodName   = "/raft.RaftService/GetSnapshot"
 )
 
 // RaftServiceClient is the client API for RaftService service.
@@ -29,12 +30,14 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
 // RaftService raccoglie le RPC di coordinamento del consenso scambiate tra
-// i consensus node del cluster, più una RPC di sola lettura (GetStatus) per
-// la Service Discovery lato client.
+// i consensus node del cluster, più due RPC di sola lettura: GetStatus per
+// la Service Discovery lato client, GetSnapshot per lo Snapshot & backup
+// service.
 type RaftServiceClient interface {
 	RequestVote(ctx context.Context, in *RequestVoteRequest, opts ...grpc.CallOption) (*RequestVoteResponse, error)
 	AppendEntries(ctx context.Context, in *AppendEntriesRequest, opts ...grpc.CallOption) (*AppendEntriesResponse, error)
 	GetStatus(ctx context.Context, in *GetStatusRequest, opts ...grpc.CallOption) (*GetStatusResponse, error)
+	GetSnapshot(ctx context.Context, in *GetSnapshotRequest, opts ...grpc.CallOption) (*GetSnapshotResponse, error)
 }
 
 type raftServiceClient struct {
@@ -75,17 +78,29 @@ func (c *raftServiceClient) GetStatus(ctx context.Context, in *GetStatusRequest,
 	return out, nil
 }
 
+func (c *raftServiceClient) GetSnapshot(ctx context.Context, in *GetSnapshotRequest, opts ...grpc.CallOption) (*GetSnapshotResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSnapshotResponse)
+	err := c.cc.Invoke(ctx, RaftService_GetSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RaftServiceServer is the server API for RaftService service.
 // All implementations must embed UnimplementedRaftServiceServer
 // for forward compatibility.
 //
 // RaftService raccoglie le RPC di coordinamento del consenso scambiate tra
-// i consensus node del cluster, più una RPC di sola lettura (GetStatus) per
-// la Service Discovery lato client.
+// i consensus node del cluster, più due RPC di sola lettura: GetStatus per
+// la Service Discovery lato client, GetSnapshot per lo Snapshot & backup
+// service.
 type RaftServiceServer interface {
 	RequestVote(context.Context, *RequestVoteRequest) (*RequestVoteResponse, error)
 	AppendEntries(context.Context, *AppendEntriesRequest) (*AppendEntriesResponse, error)
 	GetStatus(context.Context, *GetStatusRequest) (*GetStatusResponse, error)
+	GetSnapshot(context.Context, *GetSnapshotRequest) (*GetSnapshotResponse, error)
 	mustEmbedUnimplementedRaftServiceServer()
 }
 
@@ -104,6 +119,9 @@ func (UnimplementedRaftServiceServer) AppendEntries(context.Context, *AppendEntr
 }
 func (UnimplementedRaftServiceServer) GetStatus(context.Context, *GetStatusRequest) (*GetStatusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetStatus not implemented")
+}
+func (UnimplementedRaftServiceServer) GetSnapshot(context.Context, *GetSnapshotRequest) (*GetSnapshotResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSnapshot not implemented")
 }
 func (UnimplementedRaftServiceServer) mustEmbedUnimplementedRaftServiceServer() {}
 func (UnimplementedRaftServiceServer) testEmbeddedByValue()                     {}
@@ -180,6 +198,24 @@ func _RaftService_GetStatus_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RaftService_GetSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RaftServiceServer).GetSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RaftService_GetSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RaftServiceServer).GetSnapshot(ctx, req.(*GetSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RaftService_ServiceDesc is the grpc.ServiceDesc for RaftService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -198,6 +234,10 @@ var RaftService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetStatus",
 			Handler:    _RaftService_GetStatus_Handler,
+		},
+		{
+			MethodName: "GetSnapshot",
+			Handler:    _RaftService_GetSnapshot_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

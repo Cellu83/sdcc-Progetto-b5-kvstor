@@ -39,7 +39,6 @@ func main() {
 	minTimeout, maxTimeout := cfg.ElectionTimeoutRange()
 	fmt.Printf("  Election timeout: [%s, %s]\n", minTimeout, maxTimeout)
 	fmt.Printf("  Heartbeat interval: %s\n", cfg.HeartbeatInterval())
-	fmt.Printf("  Snapshot interval: %ds\n", cfg.Snapshot.IntervalSeconds)
 	fmt.Printf("  Log level: %s\n", cfg.LogLevel)
 
 	storage, err := raftlog.Open(cfg.Node.DataDir)

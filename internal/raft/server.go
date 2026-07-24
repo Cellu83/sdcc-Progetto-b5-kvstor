@@ -65,3 +65,20 @@ func (s *Server) GetStatus(ctx context.Context, req *raftpb.GetStatusRequest) (*
 		Peers:    peerInfos,
 	}, nil
 }
+
+// GetSnapshot espone Node.SnapshotState via gRPC: è la RPC di sola lettura
+// che alimenta lo Snapshot & backup service (Fase 7).
+func (s *Server) GetSnapshot(ctx context.Context, req *raftpb.GetSnapshotRequest) (*raftpb.GetSnapshotResponse, error) {
+	data, lastIncludedIndex, lastIncludedTerm := s.Node.SnapshotState()
+
+	kvs := make([]*raftpb.KeyValue, 0, len(data))
+	for k, v := range data {
+		kvs = append(kvs, &raftpb.KeyValue{Key: k, Value: v})
+	}
+
+	return &raftpb.GetSnapshotResponse{
+		LastIncludedIndex: lastIncludedIndex,
+		LastIncludedTerm:  lastIncludedTerm,
+		Data:              kvs,
+	}, nil
+}

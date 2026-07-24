@@ -87,6 +87,30 @@ func TestLen(t *testing.T) {
 	}
 }
 
+func TestSnapshotReflectsAppliedCommands(t *testing.T) {
+	s := New()
+	_ = s.Apply(Command{Op: OpPut, Key: "a", Value: "1"})
+	_ = s.Apply(Command{Op: OpPut, Key: "b", Value: "2"})
+
+	snap := s.Snapshot()
+	if len(snap) != 2 || snap["a"] != "1" || snap["b"] != "2" {
+		t.Fatalf("snapshot atteso {a:1, b:2}, ottenuto %v", snap)
+	}
+}
+
+func TestSnapshotReturnsIndependentCopy(t *testing.T) {
+	s := New()
+	_ = s.Apply(Command{Op: OpPut, Key: "a", Value: "1"})
+
+	snap := s.Snapshot()
+	snap["a"] = "modificato-fuori-dallo-store"
+
+	v, _ := s.Get("a")
+	if v != "1" {
+		t.Fatalf("modificare la mappa restituita da Snapshot non deve alterare lo Store, ottenuto %q", v)
+	}
+}
+
 // TestConcurrentAccess verifica che Store sia sicuro sotto accesso
 // concorrente: molte goroutine scrivono e leggono in parallelo. Va
 // eseguito con `go test -race` per far emergere eventuali data race.

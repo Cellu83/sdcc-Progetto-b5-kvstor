@@ -79,11 +79,34 @@ message GetStatusResponse {
   repeated PeerInfo peers = 3;
 }
 
+// KeyValue è una singola coppia chiave-valore dentro uno snapshot.
+message KeyValue {
+  string key = 1;
+  string value = 2;
+}
+
+// GetSnapshotRequest non porta parametri: chiede "dammi lo stato corrente
+// della tua state machine".
+message GetSnapshotRequest {}
+
+// GetSnapshotResponse è un'istantanea completa della state machine
+// chiave-valore del nodo interrogato, insieme ai metadati che indicano fino
+// a quale entry di log quello stato è aggiornato. Usata dallo Snapshot &
+// backup service per costruire un checkpoint esterno: il nodo non modifica
+// in alcun modo il proprio log per effetto di questa chiamata.
+message GetSnapshotResponse {
+  uint64 last_included_index = 1;
+  uint64 last_included_term = 2;
+  repeated KeyValue data = 3;
+}
+
 // RaftService raccoglie le RPC di coordinamento del consenso scambiate tra
-// i consensus node del cluster, più una RPC di sola lettura (GetStatus) per
-// la Service Discovery lato client.
+// i consensus node del cluster, più due RPC di sola lettura: GetStatus per
+// la Service Discovery lato client, GetSnapshot per lo Snapshot & backup
+// service.
 service RaftService {
   rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
   rpc AppendEntries(AppendEntriesRequest) returns (AppendEntriesResponse);
   rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
+  rpc GetSnapshot(GetSnapshotRequest) returns (GetSnapshotResponse);
 }

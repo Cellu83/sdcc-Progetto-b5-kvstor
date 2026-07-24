@@ -19,7 +19,4 @@ raft:
   heartbeat_interval_ms: 50
   rpc_timeout_ms: 50
 
-snapshot:
-  interval_seconds: 30
-
 log_level: "info"

@@ -206,6 +206,21 @@ func (n *Node) CommitIndex() uint64 {
 	return n.commitIndex
 }
 
+// SnapshotState restituisce una copia dello stato applicativo corrente
+// (tutte le coppie chiave-valore) insieme all'indice e al term dell'ultima
+// entry di log applicata (lastApplied) — i metadati che indicano fino a
+// dove quello stato è aggiornato. È il dato che lo Snapshot & backup
+// service scarica per costruire un checkpoint esterno: chiamarla non
+// modifica in alcun modo il log persistito del nodo.
+func (n *Node) SnapshotState() (data map[string]string, lastIncludedIndex uint64, lastIncludedTerm uint64) {
+	n.mu.Lock()
+	lastIncludedIndex = n.lastApplied
+	lastIncludedTerm = n.termAtIndexLocked(n.lastApplied)
+	n.mu.Unlock()
+
+	return n.store.Snapshot(), lastIncludedIndex, lastIncludedTerm
+}
+
 // Get legge il valore locale della state machine chiave-valore. È una
 // lettura "grezza": non verifica se il nodo è Leader. Quel controllo (che
 // serve per garantire la consistenza forte richiesta dalla spec) è

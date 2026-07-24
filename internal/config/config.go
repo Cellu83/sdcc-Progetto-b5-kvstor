@@ -38,18 +38,12 @@ type RaftConfig struct {
 	RPCTimeoutMs         int `yaml:"rpc_timeout_ms"`
 }
 
-// SnapshotConfig raccoglie i parametri dello Snapshot & backup service.
-type SnapshotConfig struct {
-	IntervalSeconds int `yaml:"interval_seconds"`
-}
-
 // Config è la configurazione completa letta dal file YAML di un nodo.
 type Config struct {
-	Node     NodeConfig     `yaml:"node"`
-	Cluster  ClusterConfig  `yaml:"cluster"`
-	Raft     RaftConfig     `yaml:"raft"`
-	Snapshot SnapshotConfig `yaml:"snapshot"`
-	LogLevel string         `yaml:"log_level"`
+	Node     NodeConfig    `yaml:"node"`
+	Cluster  ClusterConfig `yaml:"cluster"`
+	Raft     RaftConfig    `yaml:"raft"`
+	LogLevel string        `yaml:"log_level"`
 }
 
 // ElectionTimeoutRange restituisce i timeout di elezione come time.Duration.

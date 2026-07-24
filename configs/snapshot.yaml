@@ -1,0 +1,15 @@
+snapshot:
+  output_dir: "./data/snapshot"
+  interval_seconds: 5
+  rpc_timeout_ms: 300
+
+cluster:
+  peers:
+    - id: "node1"
+      address: "localhost:50051"
+    - id: "node2"
+      address: "localhost:50052"
+    - id: "node3"
+      address: "localhost:50053"
+
+log_level: "info"

@@ -86,3 +86,17 @@ func (s *Store) Len() int {
 	defer s.mu.RUnlock()
 	return len(s.data)
 }
+
+// Snapshot restituisce una copia dell'intera mappa chiave-valore corrente.
+// La copia (non la mappa interna) evita che chi la riceve possa modificare
+// lo stato dello Store bypassando Apply. Usata dallo Snapshot & backup
+// service per costruire un checkpoint esterno.
+func (s *Store) Snapshot() map[string]string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	out := make(map[string]string, len(s.data))
+	for k, v := range s.data {
+		out[k] = v
+	}
+	return out
+}

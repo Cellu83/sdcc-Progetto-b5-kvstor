@@ -610,6 +610,162 @@ func (x *GetStatusResponse) GetPeers() []*PeerInfo {
 	return nil
 }
 
+// KeyValue è una singola coppia chiave-valore dentro uno snapshot.
+type KeyValue struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KeyValue) Reset() {
+	*x = KeyValue{}
+	mi := &file_proto_raft_raft_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KeyValue) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KeyValue) ProtoMessage() {}
+
+func (x *KeyValue) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_raft_raft_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KeyValue.ProtoReflect.Descriptor instead.
+func (*KeyValue) Descriptor() ([]byte, []int) {
+	return file_proto_raft_raft_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *KeyValue) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *KeyValue) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+// GetSnapshotRequest non porta parametri: chiede "dammi lo stato corrente
+// della tua state machine".
+type GetSnapshotRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSnapshotRequest) Reset() {
+	*x = GetSnapshotRequest{}
+	mi := &file_proto_raft_raft_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSnapshotRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSnapshotRequest) ProtoMessage() {}
+
+func (x *GetSnapshotRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_raft_raft_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSnapshotRequest.ProtoReflect.Descriptor instead.
+func (*GetSnapshotRequest) Descriptor() ([]byte, []int) {
+	return file_proto_raft_raft_proto_rawDescGZIP(), []int{10}
+}
+
+// GetSnapshotResponse è un'istantanea completa della state machine
+// chiave-valore del nodo interrogato, insieme ai metadati che indicano fino
+// a quale entry di log quello stato è aggiornato. Usata dallo Snapshot &
+// backup service per costruire un checkpoint esterno: il nodo non modifica
+// in alcun modo il proprio log per effetto di questa chiamata.
+type GetSnapshotResponse struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	LastIncludedIndex uint64                 `protobuf:"varint,1,opt,name=last_included_index,json=lastIncludedIndex,proto3" json:"last_included_index,omitempty"`
+	LastIncludedTerm  uint64                 `protobuf:"varint,2,opt,name=last_included_term,json=lastIncludedTerm,proto3" json:"last_included_term,omitempty"`
+	Data              []*KeyValue            `protobuf:"bytes,3,rep,name=data,proto3" json:"data,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *GetSnapshotResponse) Reset() {
+	*x = GetSnapshotResponse{}
+	mi := &file_proto_raft_raft_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSnapshotResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSnapshotResponse) ProtoMessage() {}
+
+func (x *GetSnapshotResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_raft_raft_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSnapshotResponse.ProtoReflect.Descriptor instead.
+func (*GetSnapshotResponse) Descriptor() ([]byte, []int) {
+	return file_proto_raft_raft_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetSnapshotResponse) GetLastIncludedIndex() uint64 {
+	if x != nil {
+		return x.LastIncludedIndex
+	}
+	return 0
+}
+
+func (x *GetSnapshotResponse) GetLastIncludedTerm() uint64 {
+	if x != nil {
+		return x.LastIncludedTerm
+	}
+	return 0
+}
+
+func (x *GetSnapshotResponse) GetData() []*KeyValue {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
 var File_proto_raft_raft_proto protoreflect.FileDescriptor
 
 const file_proto_raft_raft_proto_rawDesc = "" +
@@ -648,15 +804,24 @@ const file_proto_raft_raft_proto_rawDesc = "" +
 	"\x11GetStatusResponse\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x1b\n" +
 	"\tleader_id\x18\x02 \x01(\tR\bleaderId\x12$\n" +
-	"\x05peers\x18\x03 \x03(\v2\x0e.raft.PeerInfoR\x05peers*#\n" +
+	"\x05peers\x18\x03 \x03(\v2\x0e.raft.PeerInfoR\x05peers\"2\n" +
+	"\bKeyValue\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value\"\x14\n" +
+	"\x12GetSnapshotRequest\"\x97\x01\n" +
+	"\x13GetSnapshotResponse\x12.\n" +
+	"\x13last_included_index\x18\x01 \x01(\x04R\x11lastIncludedIndex\x12,\n" +
+	"\x12last_included_term\x18\x02 \x01(\x04R\x10lastIncludedTerm\x12\"\n" +
+	"\x04data\x18\x03 \x03(\v2\x0e.raft.KeyValueR\x04data*#\n" +
 	"\x06OpType\x12\n" +
 	"\n" +
 	"\x06OP_PUT\x10\x00\x12\r\n" +
-	"\tOP_DELETE\x10\x012\xd9\x01\n" +
+	"\tOP_DELETE\x10\x012\x9d\x02\n" +
 	"\vRaftService\x12B\n" +
 	"\vRequestVote\x12\x18.raft.RequestVoteRequest\x1a\x19.raft.RequestVoteResponse\x12H\n" +
 	"\rAppendEntries\x12\x1a.raft.AppendEntriesRequest\x1a\x1b.raft.AppendEntriesResponse\x12<\n" +
-	"\tGetStatus\x12\x16.raft.GetStatusRequest\x1a\x17.raft.GetStatusResponseB>Z<github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/raft;raftpbb\x06proto3"
+	"\tGetStatus\x12\x16.raft.GetStatusRequest\x1a\x17.raft.GetStatusResponse\x12B\n" +
+	"\vGetSnapshot\x12\x18.raft.GetSnapshotRequest\x1a\x19.raft.GetSnapshotResponseB>Z<github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/raft;raftpbb\x06proto3"
 
 var (
 	file_proto_raft_raft_proto_rawDescOnce sync.Once
@@ -671,7 +836,7 @@ func file_proto_raft_raft_proto_rawDescGZIP() []byte {
 }
 
 var file_proto_raft_raft_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_raft_raft_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_proto_raft_raft_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_proto_raft_raft_proto_goTypes = []any{
 	(OpType)(0),                   // 0: raft.OpType
 	(*Command)(nil),               // 1: raft.Command
@@ -683,23 +848,29 @@ var file_proto_raft_raft_proto_goTypes = []any{
 	(*GetStatusRequest)(nil),      // 7: raft.GetStatusRequest
 	(*PeerInfo)(nil),              // 8: raft.PeerInfo
 	(*GetStatusResponse)(nil),     // 9: raft.GetStatusResponse
+	(*KeyValue)(nil),              // 10: raft.KeyValue
+	(*GetSnapshotRequest)(nil),    // 11: raft.GetSnapshotRequest
+	(*GetSnapshotResponse)(nil),   // 12: raft.GetSnapshotResponse
 }
 var file_proto_raft_raft_proto_depIdxs = []int32{
-	0, // 0: raft.Command.op:type_name -> raft.OpType
-	1, // 1: raft.LogEntry.command:type_name -> raft.Command
-	2, // 2: raft.AppendEntriesRequest.entries:type_name -> raft.LogEntry
-	8, // 3: raft.GetStatusResponse.peers:type_name -> raft.PeerInfo
-	3, // 4: raft.RaftService.RequestVote:input_type -> raft.RequestVoteRequest
-	5, // 5: raft.RaftService.AppendEntries:input_type -> raft.AppendEntriesRequest
-	7, // 6: raft.RaftService.GetStatus:input_type -> raft.GetStatusRequest
-	4, // 7: raft.RaftService.RequestVote:output_type -> raft.RequestVoteResponse
-	6, // 8: raft.RaftService.AppendEntries:output_type -> raft.AppendEntriesResponse
-	9, // 9: raft.RaftService.GetStatus:output_type -> raft.GetStatusResponse
-	7, // [7:10] is the sub-list for method output_type
-	4, // [4:7] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0,  // 0: raft.Command.op:type_name -> raft.OpType
+	1,  // 1: raft.LogEntry.command:type_name -> raft.Command
+	2,  // 2: raft.AppendEntriesRequest.entries:type_name -> raft.LogEntry
+	8,  // 3: raft.GetStatusResponse.peers:type_name -> raft.PeerInfo
+	10, // 4: raft.GetSnapshotResponse.data:type_name -> raft.KeyValue
+	3,  // 5: raft.RaftService.RequestVote:input_type -> raft.RequestVoteRequest
+	5,  // 6: raft.RaftService.AppendEntries:input_type -> raft.AppendEntriesRequest
+	7,  // 7: raft.RaftService.GetStatus:input_type -> raft.GetStatusRequest
+	11, // 8: raft.RaftService.GetSnapshot:input_type -> raft.GetSnapshotRequest
+	4,  // 9: raft.RaftService.RequestVote:output_type -> raft.RequestVoteResponse
+	6,  // 10: raft.RaftService.AppendEntries:output_type -> raft.AppendEntriesResponse
+	9,  // 11: raft.RaftService.GetStatus:output_type -> raft.GetStatusResponse
+	12, // 12: raft.RaftService.GetSnapshot:output_type -> raft.GetSnapshotResponse
+	9,  // [9:13] is the sub-list for method output_type
+	5,  // [5:9] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_proto_raft_raft_proto_init() }
@@ -713,7 +884,7 @@ func file_proto_raft_raft_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_raft_raft_proto_rawDesc), len(file_proto_raft_raft_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   9,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
