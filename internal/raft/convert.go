@@ -1,3 +1,5 @@
+// ************ Trasformatore di messaggi Go <-> Protobuf ************
+
 package raft
 
 import (

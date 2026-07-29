@@ -1,5 +1,6 @@
+// ****************** ENTRY E' UNA STRUCT CHE RAPPRESENTA I SINGOLI ELEMENTI DEL LOG ******************
+
 // Package raftlog definisce le entry del log replicato di Raft.
-// A partire dalla Fase 2 conterrà anche la loro persistenza su disco.
 package raftlog
 
 import "github.com/Cellu83/sdcc-Progetto-b5-kvstor/internal/kvstore"

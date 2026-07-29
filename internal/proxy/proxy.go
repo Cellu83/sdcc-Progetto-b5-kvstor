@@ -3,6 +3,8 @@
 // quale nodo consensus è l'attuale Leader, instrada la richiesta lì, e
 // gestisce in modo trasparente sia il cambio di Leader sia i nodi che non
 // rispondono (tramite un Circuit Breaker per nodo).
+//*****************************************************************************
+
 package proxy
 
 import (

@@ -1,3 +1,5 @@
+//. **** STORAGE E' UN WRAP PER LA PERSISTENZA SU DISCO DELLO STATO DI RAFT (TERM, VOTO, LOG) ***********
+
 package raftlog
 
 import (

@@ -1,4 +1,5 @@
-// Package config carica la configurazione di un nodo da file YAML.
+// ********* CONFIG E' UN PACKAGE CHE CARICA LA CONFIGURAZIONE DI UN NODO DA FILE YAML ******************
+
 // Nessun parametro operativo del sistema (ID nodo, peer, porte, timeout, ...)
 // deve essere hard-coded nel codice: tutto passa da qui.
 package config
@@ -10,6 +11,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+//**************************SERIE DI STRUCT *************
 
 // Peer identifica un nodo del cluster di consenso raggiungibile via gRPC.
 type Peer struct {
@@ -45,6 +48,8 @@ type Config struct {
 	Raft     RaftConfig    `yaml:"raft"`
 	LogLevel string        `yaml:"log_level"`
 }
+
+//**************************FUNZIONI DI CONFIG *************
 
 // ElectionTimeoutRange restituisce i timeout di elezione come time.Duration.
 func (c *Config) ElectionTimeoutRange() (time.Duration, time.Duration) {
@@ -82,6 +87,7 @@ func Load(path string) (*Config, error) {
 	return &cfg, nil
 }
 
+// validate controlla la correttezza dei parametri di configurazione.
 func (c *Config) validate() error {
 	if c.Node.ID == "" {
 		return fmt.Errorf("node.id è obbligatorio")
