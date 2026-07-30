@@ -1,0 +1,76 @@
+services:
+  node1:
+    build:
+      context: .
+      dockerfile: deployments/Dockerfile
+      args:
+        SERVICE: consensus-node
+    command: ["-config", "/configs/node1.yaml"]
+    volumes:
+      - ./configs/docker/node1.yaml:/configs/node1.yaml:ro
+      - node1-data:/data
+    ports:
+      - "50051:50051"
+
+  node2:
+    build:
+      context: .
+      dockerfile: deployments/Dockerfile
+      args:
+        SERVICE: consensus-node
+    command: ["-config", "/configs/node2.yaml"]
+    volumes:
+      - ./configs/docker/node2.yaml:/configs/node2.yaml:ro
+      - node2-data:/data
+    ports:
+      - "50052:50052"
+
+  node3:
+    build:
+      context: .
+      dockerfile: deployments/Dockerfile
+      args:
+        SERVICE: consensus-node
+    command: ["-config", "/configs/node3.yaml"]
+    volumes:
+      - ./configs/docker/node3.yaml:/configs/node3.yaml:ro
+      - node3-data:/data
+    ports:
+      - "50053:50053"
+
+  proxy:
+    build:
+      context: .
+      dockerfile: deployments/Dockerfile
+      args:
+        SERVICE: proxy
+    command: ["-config", "/configs/proxy.yaml"]
+    volumes:
+      - ./configs/docker/proxy.yaml:/configs/proxy.yaml:ro
+    ports:
+      - "50060:50060"
+    depends_on:
+      - node1
+      - node2
+      - node3
+
+  snapshot:
+    build:
+      context: .
+      dockerfile: deployments/Dockerfile
+      args:
+        SERVICE: snapshot
+    command: ["-config", "/configs/snapshot.yaml"]
+    volumes:
+      - ./configs/docker/snapshot.yaml:/configs/snapshot.yaml:ro
+      - snapshot-data:/data
+    depends_on:
+      - node1
+      - node2
+      - node3
+
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
+  snapshot-data:
