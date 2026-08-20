@@ -1,0 +1,53 @@
+node:
+    id: node4
+    bind_address: 0.0.0.0
+    raft_port: 60004
+    data_dir: data/scale/n20/node4
+cluster:
+    peers:
+        - id: node1
+          address: localhost:60001
+        - id: node2
+          address: localhost:60002
+        - id: node3
+          address: localhost:60003
+        - id: node4
+          address: localhost:60004
+        - id: node5
+          address: localhost:60005
+        - id: node6
+          address: localhost:60006
+        - id: node7
+          address: localhost:60007
+        - id: node8
+          address: localhost:60008
+        - id: node9
+          address: localhost:60009
+        - id: node10
+          address: localhost:60010
+        - id: node11
+          address: localhost:60011
+        - id: node12
+          address: localhost:60012
+        - id: node13
+          address: localhost:60013
+        - id: node14
+          address: localhost:60014
+        - id: node15
+          address: localhost:60015
+        - id: node16
+          address: localhost:60016
+        - id: node17
+          address: localhost:60017
+        - id: node18
+          address: localhost:60018
+        - id: node19
+          address: localhost:60019
+        - id: node20
+          address: localhost:60020
+raft:
+    election_timeout_min_ms: 150
+    election_timeout_max_ms: 300
+    heartbeat_interval_ms: 50
+    rpc_timeout_ms: 50
+log_level: info
