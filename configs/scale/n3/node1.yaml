@@ -1,0 +1,19 @@
+node:
+    id: node1
+    bind_address: 0.0.0.0
+    raft_port: 51001
+    data_dir: data/scale/n3/node1
+cluster:
+    peers:
+        - id: node1
+          address: localhost:51001
+        - id: node2
+          address: localhost:51002
+        - id: node3
+          address: localhost:51003
+raft:
+    election_timeout_min_ms: 150
+    election_timeout_max_ms: 300
+    heartbeat_interval_ms: 50
+    rpc_timeout_ms: 50
+log_level: info

@@ -39,6 +39,7 @@ func (s State) String() string {
 	}
 }
 
+// *****************************************************************************
 // RequestVoteArgs / RequestVoteResult ed AppendEntriesArgs / AppendEntriesResult
 // sono le versioni "in puro Go" (senza dipendere da gRPC/protobuf) degli
 // argomenti e delle risposte delle due RPC di Raft. Tenerle separate dai
@@ -87,6 +88,8 @@ type Config struct {
 // anche la cancellazione/scadenza del context della richiesta gRPC in
 // arrivo, che sync.Cond non sa gestire nativamente.
 const commitPollInterval = 5 * time.Millisecond
+
+//*****************************************************************************
 
 // Node è il cuore dell'algoritmo di consenso: la macchina a stati
 // Follower/Candidate/Leader, il timer di elezione, e le regole di

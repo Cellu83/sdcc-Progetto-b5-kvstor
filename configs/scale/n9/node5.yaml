@@ -1,0 +1,31 @@
+node:
+    id: node5
+    bind_address: 0.0.0.0
+    raft_port: 55005
+    data_dir: data/scale/n9/node5
+cluster:
+    peers:
+        - id: node1
+          address: localhost:55001
+        - id: node2
+          address: localhost:55002
+        - id: node3
+          address: localhost:55003
+        - id: node4
+          address: localhost:55004
+        - id: node5
+          address: localhost:55005
+        - id: node6
+          address: localhost:55006
+        - id: node7
+          address: localhost:55007
+        - id: node8
+          address: localhost:55008
+        - id: node9
+          address: localhost:55009
+raft:
+    election_timeout_min_ms: 150
+    election_timeout_max_ms: 300
+    heartbeat_interval_ms: 50
+    rpc_timeout_ms: 50
+log_level: info

@@ -1,0 +1,23 @@
+proxy:
+    bind_address: 0.0.0.0
+    port: 52000
+cluster:
+    peers:
+        - id: node1
+          address: localhost:52001
+        - id: node2
+          address: localhost:52002
+        - id: node3
+          address: localhost:52003
+        - id: node4
+          address: localhost:52004
+        - id: node5
+          address: localhost:52005
+rpc:
+    timeout_ms: 300
+    max_retries: 6
+    retry_backoff_ms: 50
+circuit_breaker:
+    failure_threshold: 2
+    reset_timeout_ms: 500
+log_level: info
