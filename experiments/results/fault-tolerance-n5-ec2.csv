@@ -1,0 +1,11 @@
+trial,nodes,crashed_leader,new_leader,pre_crash_term,new_term,reelection_ms,convergence_ms,converged_count,expected_count,service_restored
+1,5,node1,node4,1,2,194.087,245.238,3,3,true
+2,5,node1,node4,1,2,183.736,234.962,3,3,true
+3,5,node4,node3,1,2,182.465,233.771,3,3,true
+4,5,node1,node3,1,2,153.735,205.464,3,3,true
+5,5,node4,node5,1,2,207.620,258.398,3,3,true
+6,5,node5,node3,1,2,158.289,209.805,3,3,true
+7,5,node2,node4,1,2,258.087,309.120,3,3,true
+8,5,node4,node3,1,2,224.131,275.822,3,3,true
+9,5,node2,node4,1,2,157.061,208.422,3,3,true
+10,5,node5,node2,1,2,207.809,259.216,3,3,true
