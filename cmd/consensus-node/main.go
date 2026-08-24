@@ -16,6 +16,8 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+
 	configPath := flag.String("config", "", "percorso del file di configurazione YAML del nodo")
 	flag.Parse()
 
