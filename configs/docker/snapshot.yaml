@@ -11,5 +11,9 @@ cluster:
       address: "node2:50052"
     - id: "node3"
       address: "node3:50053"
+    - id: "node4"
+      address: "node4:50054"
+    - id: "node5"
+      address: "node5:50055"
 
 log_level: "info"

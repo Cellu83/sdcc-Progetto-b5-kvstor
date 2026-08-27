@@ -1,7 +1,7 @@
 node:
-  id: "node2"
+  id: "node4"
   bind_address: "0.0.0.0"
-  raft_port: 50052
+  raft_port: 50054
   data_dir: "/data"
 
 cluster:

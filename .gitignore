@@ -2,3 +2,4 @@
 *.log
 sdcc-b5-kvstore
 /bin/
+.DS_Store
