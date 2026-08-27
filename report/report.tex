@@ -270,6 +270,39 @@ alla volta finché non si trova il punto d'accordo col Leader, ma una volta
 trovato, il passo in avanti recupera \emph{tutto} il ritardo accumulato in
 un'unica RPC (tutte le entry mancanti insieme), non un'entry per round.
 
+\subsection{Backoff di riconnessione gRPC vs. timeout di elezione}
+\label{sec:backoff}
+
+Testando dal vivo scenari di crash e riavvio ripetuti (uccidendo e
+riavviando nodi in varie combinazioni tramite Docker), è emerso un pattern
+sistematico: un nodo riavviato avviava \emph{sempre} una nuova elezione,
+non riconosceva mai in silenzio il Leader già attivo — anche quando
+rientrava in poche centinaia di millisecondi. La causa non era casuale ma
+strutturale: \texttt{internal/raft/client.go} riusa la stessa connessione
+gRPC verso ogni peer (\texttt{Client.connFor}), ed è corretto farlo per
+evitare di riaprire una connessione TCP a ogni RPC. Il problema è che gRPC,
+di default, applica un backoff di riconnessione con \texttt{BaseDelay} di
+1 secondo — pensato per reti geografiche reali — quando una connessione
+cade. Quando un nodo veniva ucciso e poi riavviato, il Leader restava
+fermo nel proprio timer di backoff (\textgreater{}1s) prima di ritentare
+la connessione verso di lui, ben oltre il timeout di elezione del nodo
+riavviato (150--300ms): quest'ultimo scadeva sempre prima di ricevere un
+heartbeat, e si candidava — spesso vincendo, dato che il suo log restava
+comunque aggiornato quanto quello degli altri.
+
+Corretto impostando un \texttt{BaseDelay} molto più breve (50ms) tramite
+\texttt{grpc.WithConnectParams} su ogni connessione verso i peer. Verificato
+con un test locale con processi nativi: un follower ucciso e riavviato
+torna a riconoscere il Leader esistente in meno di 150ms, senza elezione.
+Ripetendo la stessa prova in container Docker, il comportamento è invece
+risultato variabile — a volte il nodo riconosce il Leader, a volte si
+candida comunque. Il motivo non è più il backoff (ormai trascurabile), ma
+un limite fisico diverso: il tempo che Docker impiega a far ripartire
+davvero il container (processo, listener gRPC) prima che il Leader possa
+riconnettersi, che può da solo superare il timeout di elezione a seconda
+del carico della macchina — un vincolo della piattaforma di
+containerizzazione, non del codice applicativo.
+
 \subsection{Compattazione dello storico in checkpoint esterni}
 
 Il servizio Snapshot \& backup soddisfa il requisito di "scaricare e
@@ -296,7 +329,7 @@ Il deployment usa un solo Dockerfile generico multi-stadio, parametrizzato
 via build-arg (\texttt{SERVICE}), invece di tre Dockerfile quasi identici:
 uno stadio di build con l'intero toolchain Go, e uno stadio finale
 minimale che contiene solo il binario compilato. \texttt{docker-compose.yml}
-definisce 5 servizi (3 consensus node, proxy, snapshot) che riferiscono
+definisce 7 servizi (5 consensus node, proxy, snapshot) che riferiscono
 tutti lo stesso Dockerfile con un \texttt{SERVICE} diverso; le
 configurazioni per l'ambiente Docker sono identiche a quelle locali tranne
 per gli indirizzi dei peer, che usano i nomi dei servizi Compose invece di

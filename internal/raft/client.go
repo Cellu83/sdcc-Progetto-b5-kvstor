@@ -4,11 +4,29 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	raftpb "github.com/Cellu83/sdcc-Progetto-b5-kvstor/proto/raft"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+// reconnectBackoff sostituisce il backoff di riconnessione di default di
+// gRPC (BaseDelay 1s, pensato per reti geografiche reali) con uno molto
+// più breve. Senza questo, un nodo che cade e rientra in pochi centinaia
+// di millisecondi (es. un restart di container Docker) non riceve
+// comunque un heartbeat in tempo utile: i peer restano fermi al loro
+// timer di backoff da almeno un secondo prima di riprovare a
+// riconnettersi, molto più lungo del timeout di elezione (150-300ms) —
+// così il nodo appena rientrato scade sempre prima e si candida sempre,
+// anche quando basterebbe riconoscere il Leader già attivo.
+var reconnectBackoff = backoff.Config{
+	BaseDelay:  50 * time.Millisecond,
+	Multiplier: 1.6,
+	Jitter:     0.2,
+	MaxDelay:   1 * time.Second,
+}
 
 // Client gestisce le connessioni gRPC verso gli altri consensus node e
 // traduce le chiamate RequestVote/AppendEntries dal formato "puro Go" di
@@ -36,7 +54,10 @@ func (c *Client) connFor(addr string) (*grpc.ClientConn, error) {
 		return conn, nil
 	}
 
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithConnectParams(grpc.ConnectParams{Backoff: reconnectBackoff}),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("connessione a %s: %w", addr, err)
 	}
