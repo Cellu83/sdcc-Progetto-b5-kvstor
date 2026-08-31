@@ -9,7 +9,8 @@ consenso **Raft**.
 
 Per la descrizione completa di architettura, scelte di design, ed
 esperimenti di valutazione, si rimanda al report (scritto in LaTeX, stile
-IEEEtran) in [`report/report.tex`](report/report.tex)
+IEEEtran) in [`report/report.tex`](report/report.tex), disponibile anche in
+versione PDF in [`report/SDCC-Progetto B5-ColaFederico.pdf`](report/SDCC-Progetto%20B5-ColaFederico.pdf)
 
 
 ## Requisiti
